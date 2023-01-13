@@ -1,0 +1,132 @@
+groups:
+- interval: 2m30s
+  name: nginx-api-errors-increase
+  rules:
+  - expr: sum by (status) (increase(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm"}[4w]))
+    labels:
+      ingress: lastfm
+      namespace: lastfm
+      service: lastfm
+      slo: nginx-api-errors
+    record: nginx_ingress_controller_requests:increase4w
+  - alert: SLOMetricAbsent
+    expr: absent(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm"})
+      == 1
+    for: 2m
+    labels:
+      ingress: lastfm
+      namespace: lastfm
+      service: lastfm
+      severity: critical
+      slo: nginx-api-errors
+- interval: 30s
+  name: nginx-api-errors
+  rules:
+  - expr: sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm",status=~"5.."}[5m]))
+      / sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm"}[5m]))
+    labels:
+      ingress: lastfm
+      namespace: lastfm
+      service: lastfm
+      slo: nginx-api-errors
+    record: nginx_ingress_controller_requests:burnrate5m
+  - expr: sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm",status=~"5.."}[30m]))
+      / sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm"}[30m]))
+    labels:
+      ingress: lastfm
+      namespace: lastfm
+      service: lastfm
+      slo: nginx-api-errors
+    record: nginx_ingress_controller_requests:burnrate30m
+  - expr: sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm",status=~"5.."}[1h]))
+      / sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm"}[1h]))
+    labels:
+      ingress: lastfm
+      namespace: lastfm
+      service: lastfm
+      slo: nginx-api-errors
+    record: nginx_ingress_controller_requests:burnrate1h
+  - expr: sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm",status=~"5.."}[2h]))
+      / sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm"}[2h]))
+    labels:
+      ingress: lastfm
+      namespace: lastfm
+      service: lastfm
+      slo: nginx-api-errors
+    record: nginx_ingress_controller_requests:burnrate2h
+  - expr: sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm",status=~"5.."}[6h]))
+      / sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm"}[6h]))
+    labels:
+      ingress: lastfm
+      namespace: lastfm
+      service: lastfm
+      slo: nginx-api-errors
+    record: nginx_ingress_controller_requests:burnrate6h
+  - expr: sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm",status=~"5.."}[1d]))
+      / sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm"}[1d]))
+    labels:
+      ingress: lastfm
+      namespace: lastfm
+      service: lastfm
+      slo: nginx-api-errors
+    record: nginx_ingress_controller_requests:burnrate1d
+  - expr: sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm",status=~"5.."}[4d]))
+      / sum(rate(nginx_ingress_controller_requests{ingress="lastfm",namespace="lastfm",service="lastfm"}[4d]))
+    labels:
+      ingress: lastfm
+      namespace: lastfm
+      service: lastfm
+      slo: nginx-api-errors
+    record: nginx_ingress_controller_requests:burnrate4d
+  - alert: ErrorBudgetBurn
+    expr: nginx_ingress_controller_requests:burnrate5m{ingress="lastfm",namespace="lastfm",service="lastfm",slo="nginx-api-errors"}
+      > (14 * (1-0.9990000000000001)) and nginx_ingress_controller_requests:burnrate1h{ingress="lastfm",namespace="lastfm",service="lastfm",slo="nginx-api-errors"}
+      > (14 * (1-0.9990000000000001))
+    for: 2m
+    labels:
+      ingress: lastfm
+      long: 1h
+      namespace: lastfm
+      service: lastfm
+      severity: critical
+      short: 5m
+      slo: nginx-api-errors
+  - alert: ErrorBudgetBurn
+    expr: nginx_ingress_controller_requests:burnrate30m{ingress="lastfm",namespace="lastfm",service="lastfm",slo="nginx-api-errors"}
+      > (7 * (1-0.9990000000000001)) and nginx_ingress_controller_requests:burnrate6h{ingress="lastfm",namespace="lastfm",service="lastfm",slo="nginx-api-errors"}
+      > (7 * (1-0.9990000000000001))
+    for: 15m
+    labels:
+      ingress: lastfm
+      long: 6h
+      namespace: lastfm
+      service: lastfm
+      severity: critical
+      short: 30m
+      slo: nginx-api-errors
+  - alert: ErrorBudgetBurn
+    expr: nginx_ingress_controller_requests:burnrate2h{ingress="lastfm",namespace="lastfm",service="lastfm",slo="nginx-api-errors"}
+      > (2 * (1-0.9990000000000001)) and nginx_ingress_controller_requests:burnrate1d{ingress="lastfm",namespace="lastfm",service="lastfm",slo="nginx-api-errors"}
+      > (2 * (1-0.9990000000000001))
+    for: 1h
+    labels:
+      ingress: lastfm
+      long: 1d
+      namespace: lastfm
+      service: lastfm
+      severity: warning
+      short: 2h
+      slo: nginx-api-errors
+  - alert: ErrorBudgetBurn
+    expr: nginx_ingress_controller_requests:burnrate6h{ingress="lastfm",namespace="lastfm",service="lastfm",slo="nginx-api-errors"}
+      > (1 * (1-0.9990000000000001)) and nginx_ingress_controller_requests:burnrate4d{ingress="lastfm",namespace="lastfm",service="lastfm",slo="nginx-api-errors"}
+      > (1 * (1-0.9990000000000001))
+    for: 3h
+    labels:
+      ingress: lastfm
+      long: 4d
+      namespace: lastfm
+      service: lastfm
+      severity: warning
+      short: 6h
+      slo: nginx-api-errors

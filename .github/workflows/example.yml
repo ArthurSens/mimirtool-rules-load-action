@@ -1,0 +1,19 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate_rules:
+    runs-on: ubuntu-latest
+    name: Upload rules to mimir
+    steps:
+      - uses: actions/checkout@v3
+      - name: Upload
+        uses: ArthurSens/mimirtool-rules-load-action@v1
+        with:
+          address: ${{ secrets.ADDRESS }}
+          id: ${{ secrets.ID }}
+          key: ${{ secrets.KEY }}
+          user: ${{ secrets.USER }}
+          ruleFilesPath: rules/*.yaml

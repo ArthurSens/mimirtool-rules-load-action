@@ -1,0 +1,106 @@
+groups:
+- interval: 2m30s
+  name: thanos-query-increase
+  rules:
+  - expr: sum by (code, handler) (increase(http_requests_total{handler=~"query|query_range",job="thanos-query"}[4w]))
+    labels:
+      job: thanos-query
+      slo: thanos-query
+    record: http_requests:increase4w
+  - alert: SLOMetricAbsent
+    expr: absent(http_requests_total{handler=~"query|query_range",job="thanos-query"})
+      == 1
+    for: 2m
+    labels:
+      job: thanos-query
+      severity: critical
+      slo: thanos-query
+- interval: 30s
+  name: thanos-query
+  rules:
+  - expr: sum by (handler) (rate(http_requests_total{code=~"5..",handler=~"query|query_range",job="thanos-query"}[5m]))
+      / sum by (handler) (rate(http_requests_total{handler=~"query|query_range",job="thanos-query"}[5m]))
+    labels:
+      job: thanos-query
+      slo: thanos-query
+    record: http_requests:burnrate5m
+  - expr: sum by (handler) (rate(http_requests_total{code=~"5..",handler=~"query|query_range",job="thanos-query"}[30m]))
+      / sum by (handler) (rate(http_requests_total{handler=~"query|query_range",job="thanos-query"}[30m]))
+    labels:
+      job: thanos-query
+      slo: thanos-query
+    record: http_requests:burnrate30m
+  - expr: sum by (handler) (rate(http_requests_total{code=~"5..",handler=~"query|query_range",job="thanos-query"}[1h]))
+      / sum by (handler) (rate(http_requests_total{handler=~"query|query_range",job="thanos-query"}[1h]))
+    labels:
+      job: thanos-query
+      slo: thanos-query
+    record: http_requests:burnrate1h
+  - expr: sum by (handler) (rate(http_requests_total{code=~"5..",handler=~"query|query_range",job="thanos-query"}[2h]))
+      / sum by (handler) (rate(http_requests_total{handler=~"query|query_range",job="thanos-query"}[2h]))
+    labels:
+      job: thanos-query
+      slo: thanos-query
+    record: http_requests:burnrate2h
+  - expr: sum by (handler) (rate(http_requests_total{code=~"5..",handler=~"query|query_range",job="thanos-query"}[6h]))
+      / sum by (handler) (rate(http_requests_total{handler=~"query|query_range",job="thanos-query"}[6h]))
+    labels:
+      job: thanos-query
+      slo: thanos-query
+    record: http_requests:burnrate6h
+  - expr: sum by (handler) (rate(http_requests_total{code=~"5..",handler=~"query|query_range",job="thanos-query"}[1d]))
+      / sum by (handler) (rate(http_requests_total{handler=~"query|query_range",job="thanos-query"}[1d]))
+    labels:
+      job: thanos-query
+      slo: thanos-query
+    record: http_requests:burnrate1d
+  - expr: sum by (handler) (rate(http_requests_total{code=~"5..",handler=~"query|query_range",job="thanos-query"}[4d]))
+      / sum by (handler) (rate(http_requests_total{handler=~"query|query_range",job="thanos-query"}[4d]))
+    labels:
+      job: thanos-query
+      slo: thanos-query
+    record: http_requests:burnrate4d
+  - alert: ErrorBudgetBurn
+    expr: http_requests:burnrate5m{handler=~"query|query_range",job="thanos-query",slo="thanos-query"}
+      > (14 * (1-0.99)) and http_requests:burnrate1h{handler=~"query|query_range",job="thanos-query",slo="thanos-query"}
+      > (14 * (1-0.99))
+    for: 2m
+    labels:
+      job: thanos-query
+      long: 1h
+      severity: critical
+      short: 5m
+      slo: thanos-query
+  - alert: ErrorBudgetBurn
+    expr: http_requests:burnrate30m{handler=~"query|query_range",job="thanos-query",slo="thanos-query"}
+      > (7 * (1-0.99)) and http_requests:burnrate6h{handler=~"query|query_range",job="thanos-query",slo="thanos-query"}
+      > (7 * (1-0.99))
+    for: 15m
+    labels:
+      job: thanos-query
+      long: 6h
+      severity: critical
+      short: 30m
+      slo: thanos-query
+  - alert: ErrorBudgetBurn
+    expr: http_requests:burnrate2h{handler=~"query|query_range",job="thanos-query",slo="thanos-query"}
+      > (2 * (1-0.99)) and http_requests:burnrate1d{handler=~"query|query_range",job="thanos-query",slo="thanos-query"}
+      > (2 * (1-0.99))
+    for: 1h
+    labels:
+      job: thanos-query
+      long: 1d
+      severity: warning
+      short: 2h
+      slo: thanos-query
+  - alert: ErrorBudgetBurn
+    expr: http_requests:burnrate6h{handler=~"query|query_range",job="thanos-query",slo="thanos-query"}
+      > (1 * (1-0.99)) and http_requests:burnrate4d{handler=~"query|query_range",job="thanos-query",slo="thanos-query"}
+      > (1 * (1-0.99))
+    for: 3h
+    labels:
+      job: thanos-query
+      long: 4d
+      severity: warning
+      short: 6h
+      slo: thanos-query

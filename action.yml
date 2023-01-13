@@ -1,0 +1,30 @@
+name: "Mimirtool rules load action"
+description: "Load alert and recording rules to a mimir instance"
+inputs:
+  mimirtoolVersion:
+    description: "Version of mimirtool used"
+    required: false
+    default: "2.5.0"
+  address:
+    description: "Address of the Mimir cluster"
+    required: true
+    default: ""
+  id:
+    description: "Mimir tenant ID"
+    required: true
+    default: ""
+  key:
+    description: "API key to use when contacting Mimir"
+    required: true
+    default: ""
+  user:
+    description: "API user to use when contacting Mimir"
+    required: true
+    default: ""
+  ruleFilesPath:
+    description: "Path to rule files that will be uploaded"
+    required: true
+    default: "*.yaml"
+runs:
+  using: "node16"
+  main: "index.js"

@@ -1,0 +1,92 @@
+groups:
+- interval: 1m
+  name: prometheus-operator-http-increase
+  rules:
+  - expr: sum by (status_code) (increase(prometheus_operator_kubernetes_client_http_requests_total[1w]))
+    labels:
+      slo: prometheus-operator-http
+    record: prometheus_operator_kubernetes_client_http_requests:increase1w
+  - alert: SLOMetricAbsent
+    expr: absent(prometheus_operator_kubernetes_client_http_requests_total) == 1
+    for: 1m
+    labels:
+      severity: critical
+      slo: prometheus-operator-http
+- interval: 30s
+  name: prometheus-operator-http
+  rules:
+  - expr: sum(rate(prometheus_operator_kubernetes_client_http_requests_total{status_code=~"5.."}[1m]))
+      / sum(rate(prometheus_operator_kubernetes_client_http_requests_total[1m]))
+    labels:
+      slo: prometheus-operator-http
+    record: prometheus_operator_kubernetes_client_http_requests:burnrate1m
+  - expr: sum(rate(prometheus_operator_kubernetes_client_http_requests_total{status_code=~"5.."}[8m]))
+      / sum(rate(prometheus_operator_kubernetes_client_http_requests_total[8m]))
+    labels:
+      slo: prometheus-operator-http
+    record: prometheus_operator_kubernetes_client_http_requests:burnrate8m
+  - expr: sum(rate(prometheus_operator_kubernetes_client_http_requests_total{status_code=~"5.."}[15m]))
+      / sum(rate(prometheus_operator_kubernetes_client_http_requests_total[15m]))
+    labels:
+      slo: prometheus-operator-http
+    record: prometheus_operator_kubernetes_client_http_requests:burnrate15m
+  - expr: sum(rate(prometheus_operator_kubernetes_client_http_requests_total{status_code=~"5.."}[30m]))
+      / sum(rate(prometheus_operator_kubernetes_client_http_requests_total[30m]))
+    labels:
+      slo: prometheus-operator-http
+    record: prometheus_operator_kubernetes_client_http_requests:burnrate30m
+  - expr: sum(rate(prometheus_operator_kubernetes_client_http_requests_total{status_code=~"5.."}[1h30m]))
+      / sum(rate(prometheus_operator_kubernetes_client_http_requests_total[1h30m]))
+    labels:
+      slo: prometheus-operator-http
+    record: prometheus_operator_kubernetes_client_http_requests:burnrate1h30m
+  - expr: sum(rate(prometheus_operator_kubernetes_client_http_requests_total{status_code=~"5.."}[6h]))
+      / sum(rate(prometheus_operator_kubernetes_client_http_requests_total[6h]))
+    labels:
+      slo: prometheus-operator-http
+    record: prometheus_operator_kubernetes_client_http_requests:burnrate6h
+  - expr: sum(rate(prometheus_operator_kubernetes_client_http_requests_total{status_code=~"5.."}[1d]))
+      / sum(rate(prometheus_operator_kubernetes_client_http_requests_total[1d]))
+    labels:
+      slo: prometheus-operator-http
+    record: prometheus_operator_kubernetes_client_http_requests:burnrate1d
+  - alert: ErrorBudgetBurn
+    expr: prometheus_operator_kubernetes_client_http_requests:burnrate1m{slo="prometheus-operator-http"}
+      > (14 * (1-0.95)) and prometheus_operator_kubernetes_client_http_requests:burnrate15m{slo="prometheus-operator-http"}
+      > (14 * (1-0.95))
+    for: 1m
+    labels:
+      long: 15m
+      severity: critical
+      short: 1m
+      slo: prometheus-operator-http
+  - alert: ErrorBudgetBurn
+    expr: prometheus_operator_kubernetes_client_http_requests:burnrate8m{slo="prometheus-operator-http"}
+      > (7 * (1-0.95)) and prometheus_operator_kubernetes_client_http_requests:burnrate1h30m{slo="prometheus-operator-http"}
+      > (7 * (1-0.95))
+    for: 4m
+    labels:
+      long: 1h30m
+      severity: critical
+      short: 8m
+      slo: prometheus-operator-http
+  - alert: ErrorBudgetBurn
+    expr: prometheus_operator_kubernetes_client_http_requests:burnrate30m{slo="prometheus-operator-http"}
+      > (2 * (1-0.95)) and prometheus_operator_kubernetes_client_http_requests:burnrate6h{slo="prometheus-operator-http"}
+      > (2 * (1-0.95))
+    for: 15m
+    labels:
+      long: 6h
+      severity: warning
+      short: 30m
+      slo: prometheus-operator-http
+  - alert: ErrorBudgetBurn
+    expr: prometheus_operator_kubernetes_client_http_requests:burnrate1h30m{slo="prometheus-operator-http"}
+      > (1 * (1-0.95)) and prometheus_operator_kubernetes_client_http_requests:burnrate1d{slo="prometheus-operator-http"}
+      > (1 * (1-0.95))
+    for: 45m
+    labels:
+      long: 1d
+      severity: warning
+      short: 1h30m
+      slo: prometheus-operator-http

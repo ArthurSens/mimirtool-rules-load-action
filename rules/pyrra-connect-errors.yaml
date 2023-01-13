@@ -1,0 +1,105 @@
+groups:
+- interval: 1m30s
+  name: pyrra-connect-errors-increase
+  rules:
+  - expr: sum by (code, method, service) (increase(connect_server_requests_total{job="pyrra"}[2w]))
+    labels:
+      job: pyrra
+      slo: pyrra-connect-errors
+    record: connect_server_requests:increase2w
+  - alert: SLOMetricAbsent
+    expr: absent(connect_server_requests_total{job="pyrra"}) == 1
+    for: 1m
+    labels:
+      job: pyrra
+      severity: critical
+      slo: pyrra-connect-errors
+- interval: 30s
+  name: pyrra-connect-errors
+  rules:
+  - expr: sum by (method, service) (rate(connect_server_requests_total{code=~"aborted|unavailable|internal|unknown|unimplemented|dataloss",job="pyrra"}[3m]))
+      / sum by (method, service) (rate(connect_server_requests_total{job="pyrra"}[3m]))
+    labels:
+      job: pyrra
+      slo: pyrra-connect-errors
+    record: connect_server_requests:burnrate3m
+  - expr: sum by (method, service) (rate(connect_server_requests_total{code=~"aborted|unavailable|internal|unknown|unimplemented|dataloss",job="pyrra"}[15m]))
+      / sum by (method, service) (rate(connect_server_requests_total{job="pyrra"}[15m]))
+    labels:
+      job: pyrra
+      slo: pyrra-connect-errors
+    record: connect_server_requests:burnrate15m
+  - expr: sum by (method, service) (rate(connect_server_requests_total{code=~"aborted|unavailable|internal|unknown|unimplemented|dataloss",job="pyrra"}[30m]))
+      / sum by (method, service) (rate(connect_server_requests_total{job="pyrra"}[30m]))
+    labels:
+      job: pyrra
+      slo: pyrra-connect-errors
+    record: connect_server_requests:burnrate30m
+  - expr: sum by (method, service) (rate(connect_server_requests_total{code=~"aborted|unavailable|internal|unknown|unimplemented|dataloss",job="pyrra"}[1h]))
+      / sum by (method, service) (rate(connect_server_requests_total{job="pyrra"}[1h]))
+    labels:
+      job: pyrra
+      slo: pyrra-connect-errors
+    record: connect_server_requests:burnrate1h
+  - expr: sum by (method, service) (rate(connect_server_requests_total{code=~"aborted|unavailable|internal|unknown|unimplemented|dataloss",job="pyrra"}[3h]))
+      / sum by (method, service) (rate(connect_server_requests_total{job="pyrra"}[3h]))
+    labels:
+      job: pyrra
+      slo: pyrra-connect-errors
+    record: connect_server_requests:burnrate3h
+  - expr: sum by (method, service) (rate(connect_server_requests_total{code=~"aborted|unavailable|internal|unknown|unimplemented|dataloss",job="pyrra"}[12h]))
+      / sum by (method, service) (rate(connect_server_requests_total{job="pyrra"}[12h]))
+    labels:
+      job: pyrra
+      slo: pyrra-connect-errors
+    record: connect_server_requests:burnrate12h
+  - expr: sum by (method, service) (rate(connect_server_requests_total{code=~"aborted|unavailable|internal|unknown|unimplemented|dataloss",job="pyrra"}[2d]))
+      / sum by (method, service) (rate(connect_server_requests_total{job="pyrra"}[2d]))
+    labels:
+      job: pyrra
+      slo: pyrra-connect-errors
+    record: connect_server_requests:burnrate2d
+  - alert: ErrorBudgetBurn
+    expr: connect_server_requests:burnrate3m{job="pyrra",slo="pyrra-connect-errors"}
+      > (14 * (1-0.99)) and connect_server_requests:burnrate30m{job="pyrra",slo="pyrra-connect-errors"}
+      > (14 * (1-0.99))
+    for: 1m
+    labels:
+      job: pyrra
+      long: 30m
+      severity: critical
+      short: 3m
+      slo: pyrra-connect-errors
+  - alert: ErrorBudgetBurn
+    expr: connect_server_requests:burnrate15m{job="pyrra",slo="pyrra-connect-errors"}
+      > (7 * (1-0.99)) and connect_server_requests:burnrate3h{job="pyrra",slo="pyrra-connect-errors"}
+      > (7 * (1-0.99))
+    for: 8m
+    labels:
+      job: pyrra
+      long: 3h
+      severity: critical
+      short: 15m
+      slo: pyrra-connect-errors
+  - alert: ErrorBudgetBurn
+    expr: connect_server_requests:burnrate1h{job="pyrra",slo="pyrra-connect-errors"}
+      > (2 * (1-0.99)) and connect_server_requests:burnrate12h{job="pyrra",slo="pyrra-connect-errors"}
+      > (2 * (1-0.99))
+    for: 30m
+    labels:
+      job: pyrra
+      long: 12h
+      severity: warning
+      short: 1h
+      slo: pyrra-connect-errors
+  - alert: ErrorBudgetBurn
+    expr: connect_server_requests:burnrate3h{job="pyrra",slo="pyrra-connect-errors"}
+      > (1 * (1-0.99)) and connect_server_requests:burnrate2d{job="pyrra",slo="pyrra-connect-errors"}
+      > (1 * (1-0.99))
+    for: 1h30m
+    labels:
+      job: pyrra
+      long: 2d
+      severity: warning
+      short: 3h
+      slo: pyrra-connect-errors

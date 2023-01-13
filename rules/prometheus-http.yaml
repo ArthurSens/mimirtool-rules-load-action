@@ -1,0 +1,92 @@
+groups:
+- interval: 1m
+  name: prometheus-api-query-increase
+  rules:
+  - expr: sum by (code, handler) (increase(prometheus_http_requests_total{handler=~"/api.*"}[1w]))
+    labels:
+      slo: prometheus-api-query
+    record: prometheus_http_requests:increase1w
+  - alert: SLOMetricAbsent
+    expr: absent(prometheus_http_requests_total{handler=~"/api.*"}) == 1
+    for: 1m
+    labels:
+      severity: critical
+      slo: prometheus-api-query
+- interval: 30s
+  name: prometheus-api-query
+  rules:
+  - expr: sum by (handler) (rate(prometheus_http_requests_total{code=~"5..",handler=~"/api.*"}[1m]))
+      / sum by (handler) (rate(prometheus_http_requests_total{handler=~"/api.*"}[1m]))
+    labels:
+      slo: prometheus-api-query
+    record: prometheus_http_requests:burnrate1m
+  - expr: sum by (handler) (rate(prometheus_http_requests_total{code=~"5..",handler=~"/api.*"}[8m]))
+      / sum by (handler) (rate(prometheus_http_requests_total{handler=~"/api.*"}[8m]))
+    labels:
+      slo: prometheus-api-query
+    record: prometheus_http_requests:burnrate8m
+  - expr: sum by (handler) (rate(prometheus_http_requests_total{code=~"5..",handler=~"/api.*"}[15m]))
+      / sum by (handler) (rate(prometheus_http_requests_total{handler=~"/api.*"}[15m]))
+    labels:
+      slo: prometheus-api-query
+    record: prometheus_http_requests:burnrate15m
+  - expr: sum by (handler) (rate(prometheus_http_requests_total{code=~"5..",handler=~"/api.*"}[30m]))
+      / sum by (handler) (rate(prometheus_http_requests_total{handler=~"/api.*"}[30m]))
+    labels:
+      slo: prometheus-api-query
+    record: prometheus_http_requests:burnrate30m
+  - expr: sum by (handler) (rate(prometheus_http_requests_total{code=~"5..",handler=~"/api.*"}[1h30m]))
+      / sum by (handler) (rate(prometheus_http_requests_total{handler=~"/api.*"}[1h30m]))
+    labels:
+      slo: prometheus-api-query
+    record: prometheus_http_requests:burnrate1h30m
+  - expr: sum by (handler) (rate(prometheus_http_requests_total{code=~"5..",handler=~"/api.*"}[6h]))
+      / sum by (handler) (rate(prometheus_http_requests_total{handler=~"/api.*"}[6h]))
+    labels:
+      slo: prometheus-api-query
+    record: prometheus_http_requests:burnrate6h
+  - expr: sum by (handler) (rate(prometheus_http_requests_total{code=~"5..",handler=~"/api.*"}[1d]))
+      / sum by (handler) (rate(prometheus_http_requests_total{handler=~"/api.*"}[1d]))
+    labels:
+      slo: prometheus-api-query
+    record: prometheus_http_requests:burnrate1d
+  - alert: ErrorBudgetBurn
+    expr: prometheus_http_requests:burnrate1m{handler=~"/api.*",slo="prometheus-api-query"}
+      > (14 * (1-0.99)) and prometheus_http_requests:burnrate15m{handler=~"/api.*",slo="prometheus-api-query"}
+      > (14 * (1-0.99))
+    for: 1m
+    labels:
+      long: 15m
+      severity: critical
+      short: 1m
+      slo: prometheus-api-query
+  - alert: ErrorBudgetBurn
+    expr: prometheus_http_requests:burnrate8m{handler=~"/api.*",slo="prometheus-api-query"}
+      > (7 * (1-0.99)) and prometheus_http_requests:burnrate1h30m{handler=~"/api.*",slo="prometheus-api-query"}
+      > (7 * (1-0.99))
+    for: 4m
+    labels:
+      long: 1h30m
+      severity: critical
+      short: 8m
+      slo: prometheus-api-query
+  - alert: ErrorBudgetBurn
+    expr: prometheus_http_requests:burnrate30m{handler=~"/api.*",slo="prometheus-api-query"}
+      > (2 * (1-0.99)) and prometheus_http_requests:burnrate6h{handler=~"/api.*",slo="prometheus-api-query"}
+      > (2 * (1-0.99))
+    for: 15m
+    labels:
+      long: 6h
+      severity: warning
+      short: 30m
+      slo: prometheus-api-query
+  - alert: ErrorBudgetBurn
+    expr: prometheus_http_requests:burnrate1h30m{handler=~"/api.*",slo="prometheus-api-query"}
+      > (1 * (1-0.99)) and prometheus_http_requests:burnrate1d{handler=~"/api.*",slo="prometheus-api-query"}
+      > (1 * (1-0.99))
+    for: 45m
+    labels:
+      long: 1d
+      severity: warning
+      short: 1h30m
+      slo: prometheus-api-query

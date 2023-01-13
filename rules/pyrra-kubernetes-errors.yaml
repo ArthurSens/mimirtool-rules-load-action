@@ -1,0 +1,106 @@
+groups:
+- interval: 1m
+  name: pyrra-kubernetes-errors-increase
+  rules:
+  - expr: sum by (result) (increase(controller_runtime_reconcile_total{controller="servicelevelobjective"}[1w]))
+    labels:
+      controller: servicelevelobjective
+      slo: pyrra-kubernetes-errors
+    record: controller_runtime_reconcile:increase1w
+  - alert: SLOMetricAbsent
+    expr: absent(controller_runtime_reconcile_total{controller="servicelevelobjective"})
+      == 1
+    for: 1m
+    labels:
+      controller: servicelevelobjective
+      severity: critical
+      slo: pyrra-kubernetes-errors
+- interval: 30s
+  name: pyrra-kubernetes-errors
+  rules:
+  - expr: sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective",result="error"}[1m]))
+      / sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective"}[1m]))
+    labels:
+      controller: servicelevelobjective
+      slo: pyrra-kubernetes-errors
+    record: controller_runtime_reconcile:burnrate1m
+  - expr: sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective",result="error"}[8m]))
+      / sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective"}[8m]))
+    labels:
+      controller: servicelevelobjective
+      slo: pyrra-kubernetes-errors
+    record: controller_runtime_reconcile:burnrate8m
+  - expr: sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective",result="error"}[15m]))
+      / sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective"}[15m]))
+    labels:
+      controller: servicelevelobjective
+      slo: pyrra-kubernetes-errors
+    record: controller_runtime_reconcile:burnrate15m
+  - expr: sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective",result="error"}[30m]))
+      / sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective"}[30m]))
+    labels:
+      controller: servicelevelobjective
+      slo: pyrra-kubernetes-errors
+    record: controller_runtime_reconcile:burnrate30m
+  - expr: sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective",result="error"}[1h30m]))
+      / sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective"}[1h30m]))
+    labels:
+      controller: servicelevelobjective
+      slo: pyrra-kubernetes-errors
+    record: controller_runtime_reconcile:burnrate1h30m
+  - expr: sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective",result="error"}[6h]))
+      / sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective"}[6h]))
+    labels:
+      controller: servicelevelobjective
+      slo: pyrra-kubernetes-errors
+    record: controller_runtime_reconcile:burnrate6h
+  - expr: sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective",result="error"}[1d]))
+      / sum(rate(controller_runtime_reconcile_total{controller="servicelevelobjective"}[1d]))
+    labels:
+      controller: servicelevelobjective
+      slo: pyrra-kubernetes-errors
+    record: controller_runtime_reconcile:burnrate1d
+  - alert: ErrorBudgetBurn
+    expr: controller_runtime_reconcile:burnrate1m{controller="servicelevelobjective",slo="pyrra-kubernetes-errors"}
+      > (14 * (1-0.99)) and controller_runtime_reconcile:burnrate15m{controller="servicelevelobjective",slo="pyrra-kubernetes-errors"}
+      > (14 * (1-0.99))
+    for: 1m
+    labels:
+      controller: servicelevelobjective
+      long: 15m
+      severity: critical
+      short: 1m
+      slo: pyrra-kubernetes-errors
+  - alert: ErrorBudgetBurn
+    expr: controller_runtime_reconcile:burnrate8m{controller="servicelevelobjective",slo="pyrra-kubernetes-errors"}
+      > (7 * (1-0.99)) and controller_runtime_reconcile:burnrate1h30m{controller="servicelevelobjective",slo="pyrra-kubernetes-errors"}
+      > (7 * (1-0.99))
+    for: 4m
+    labels:
+      controller: servicelevelobjective
+      long: 1h30m
+      severity: critical
+      short: 8m
+      slo: pyrra-kubernetes-errors
+  - alert: ErrorBudgetBurn
+    expr: controller_runtime_reconcile:burnrate30m{controller="servicelevelobjective",slo="pyrra-kubernetes-errors"}
+      > (2 * (1-0.99)) and controller_runtime_reconcile:burnrate6h{controller="servicelevelobjective",slo="pyrra-kubernetes-errors"}
+      > (2 * (1-0.99))
+    for: 15m
+    labels:
+      controller: servicelevelobjective
+      long: 6h
+      severity: warning
+      short: 30m
+      slo: pyrra-kubernetes-errors
+  - alert: ErrorBudgetBurn
+    expr: controller_runtime_reconcile:burnrate1h30m{controller="servicelevelobjective",slo="pyrra-kubernetes-errors"}
+      > (1 * (1-0.99)) and controller_runtime_reconcile:burnrate1d{controller="servicelevelobjective",slo="pyrra-kubernetes-errors"}
+      > (1 * (1-0.99))
+    for: 45m
+    labels:
+      controller: servicelevelobjective
+      long: 1d
+      severity: warning
+      short: 1h30m
+      slo: pyrra-kubernetes-errors

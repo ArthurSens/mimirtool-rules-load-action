@@ -1,0 +1,95 @@
+groups:
+- interval: 1m
+  name: pyrra-filesystem-errors-increase
+  rules:
+  - expr: sum(increase(pyrra_filesystem_reconciles_total[1w]))
+    labels:
+      slo: pyrra-filesystem-errors
+    record: pyrra_filesystem_reconciles:increase1w
+  - alert: SLOMetricAbsent
+    expr: absent(pyrra_filesystem_reconciles_total) == 1
+    for: 1m
+    labels:
+      severity: critical
+      slo: pyrra-filesystem-errors
+  - expr: sum(increase(pyrra_filesystem_reconciles_errors_total[1w]))
+    labels:
+      slo: pyrra-filesystem-errors
+    record: pyrra_filesystem_reconciles_errors:increase1w
+  - alert: SLOMetricAbsent
+    expr: absent(pyrra_filesystem_reconciles_errors_total) == 1
+    for: 1m
+    labels:
+      severity: critical
+      slo: pyrra-filesystem-errors
+- interval: 30s
+  name: pyrra-filesystem-errors
+  rules:
+  - expr: sum(rate(pyrra_filesystem_reconciles_errors_total[1m])) / sum(rate(pyrra_filesystem_reconciles_total[1m]))
+    labels:
+      slo: pyrra-filesystem-errors
+    record: pyrra_filesystem_reconciles:burnrate1m
+  - expr: sum(rate(pyrra_filesystem_reconciles_errors_total[8m])) / sum(rate(pyrra_filesystem_reconciles_total[8m]))
+    labels:
+      slo: pyrra-filesystem-errors
+    record: pyrra_filesystem_reconciles:burnrate8m
+  - expr: sum(rate(pyrra_filesystem_reconciles_errors_total[15m])) / sum(rate(pyrra_filesystem_reconciles_total[15m]))
+    labels:
+      slo: pyrra-filesystem-errors
+    record: pyrra_filesystem_reconciles:burnrate15m
+  - expr: sum(rate(pyrra_filesystem_reconciles_errors_total[30m])) / sum(rate(pyrra_filesystem_reconciles_total[30m]))
+    labels:
+      slo: pyrra-filesystem-errors
+    record: pyrra_filesystem_reconciles:burnrate30m
+  - expr: sum(rate(pyrra_filesystem_reconciles_errors_total[1h30m])) / sum(rate(pyrra_filesystem_reconciles_total[1h30m]))
+    labels:
+      slo: pyrra-filesystem-errors
+    record: pyrra_filesystem_reconciles:burnrate1h30m
+  - expr: sum(rate(pyrra_filesystem_reconciles_errors_total[6h])) / sum(rate(pyrra_filesystem_reconciles_total[6h]))
+    labels:
+      slo: pyrra-filesystem-errors
+    record: pyrra_filesystem_reconciles:burnrate6h
+  - expr: sum(rate(pyrra_filesystem_reconciles_errors_total[1d])) / sum(rate(pyrra_filesystem_reconciles_total[1d]))
+    labels:
+      slo: pyrra-filesystem-errors
+    record: pyrra_filesystem_reconciles:burnrate1d
+  - alert: ErrorBudgetBurn
+    expr: pyrra_filesystem_reconciles:burnrate1m{slo="pyrra-filesystem-errors"} >
+      (14 * (1-0.99)) and pyrra_filesystem_reconciles:burnrate15m{slo="pyrra-filesystem-errors"}
+      > (14 * (1-0.99))
+    for: 1m
+    labels:
+      long: 15m
+      severity: critical
+      short: 1m
+      slo: pyrra-filesystem-errors
+  - alert: ErrorBudgetBurn
+    expr: pyrra_filesystem_reconciles:burnrate8m{slo="pyrra-filesystem-errors"} >
+      (7 * (1-0.99)) and pyrra_filesystem_reconciles:burnrate1h30m{slo="pyrra-filesystem-errors"}
+      > (7 * (1-0.99))
+    for: 4m
+    labels:
+      long: 1h30m
+      severity: critical
+      short: 8m
+      slo: pyrra-filesystem-errors
+  - alert: ErrorBudgetBurn
+    expr: pyrra_filesystem_reconciles:burnrate30m{slo="pyrra-filesystem-errors"} >
+      (2 * (1-0.99)) and pyrra_filesystem_reconciles:burnrate6h{slo="pyrra-filesystem-errors"}
+      > (2 * (1-0.99))
+    for: 15m
+    labels:
+      long: 6h
+      severity: warning
+      short: 30m
+      slo: pyrra-filesystem-errors
+  - alert: ErrorBudgetBurn
+    expr: pyrra_filesystem_reconciles:burnrate1h30m{slo="pyrra-filesystem-errors"}
+      > (1 * (1-0.99)) and pyrra_filesystem_reconciles:burnrate1d{slo="pyrra-filesystem-errors"}
+      > (1 * (1-0.99))
+    for: 45m
+    labels:
+      long: 1d
+      severity: warning
+      short: 1h30m
+      slo: pyrra-filesystem-errors

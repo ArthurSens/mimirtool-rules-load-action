@@ -1,0 +1,145 @@
+groups:
+- interval: 1m
+  name: thanos-store-increase
+  rules:
+  - expr: sum by (grpc_code) (increase(grpc_server_handled_total{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[1w]))
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      namespace: monitoring
+      slo: thanos-store
+    record: grpc_server_handled:increase1w
+  - alert: SLOMetricAbsent
+    expr: absent(grpc_server_handled_total{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"})
+      == 1
+    for: 1m
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      namespace: monitoring
+      severity: critical
+      slo: thanos-store
+- interval: 30s
+  name: thanos-store
+  rules:
+  - expr: sum(rate(grpc_server_handled_total{grpc_code=~"Aborted|Unavailable|Internal|Unknown|Unimplemented|DataLoss",grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[1m]))
+      / sum(rate(grpc_server_handled_total{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[1m]))
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      namespace: monitoring
+      slo: thanos-store
+    record: grpc_server_handled:burnrate1m
+  - expr: sum(rate(grpc_server_handled_total{grpc_code=~"Aborted|Unavailable|Internal|Unknown|Unimplemented|DataLoss",grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[8m]))
+      / sum(rate(grpc_server_handled_total{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[8m]))
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      namespace: monitoring
+      slo: thanos-store
+    record: grpc_server_handled:burnrate8m
+  - expr: sum(rate(grpc_server_handled_total{grpc_code=~"Aborted|Unavailable|Internal|Unknown|Unimplemented|DataLoss",grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[15m]))
+      / sum(rate(grpc_server_handled_total{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[15m]))
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      namespace: monitoring
+      slo: thanos-store
+    record: grpc_server_handled:burnrate15m
+  - expr: sum(rate(grpc_server_handled_total{grpc_code=~"Aborted|Unavailable|Internal|Unknown|Unimplemented|DataLoss",grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[30m]))
+      / sum(rate(grpc_server_handled_total{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[30m]))
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      namespace: monitoring
+      slo: thanos-store
+    record: grpc_server_handled:burnrate30m
+  - expr: sum(rate(grpc_server_handled_total{grpc_code=~"Aborted|Unavailable|Internal|Unknown|Unimplemented|DataLoss",grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[1h30m]))
+      / sum(rate(grpc_server_handled_total{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[1h30m]))
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      namespace: monitoring
+      slo: thanos-store
+    record: grpc_server_handled:burnrate1h30m
+  - expr: sum(rate(grpc_server_handled_total{grpc_code=~"Aborted|Unavailable|Internal|Unknown|Unimplemented|DataLoss",grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[6h]))
+      / sum(rate(grpc_server_handled_total{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[6h]))
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      namespace: monitoring
+      slo: thanos-store
+    record: grpc_server_handled:burnrate6h
+  - expr: sum(rate(grpc_server_handled_total{grpc_code=~"Aborted|Unavailable|Internal|Unknown|Unimplemented|DataLoss",grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[1d]))
+      / sum(rate(grpc_server_handled_total{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring"}[1d]))
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      namespace: monitoring
+      slo: thanos-store
+    record: grpc_server_handled:burnrate1d
+  - alert: ErrorBudgetBurn
+    expr: grpc_server_handled:burnrate1m{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring",slo="thanos-store"}
+      > (14 * (1-0.995)) and grpc_server_handled:burnrate15m{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring",slo="thanos-store"}
+      > (14 * (1-0.995))
+    for: 1m
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      long: 15m
+      namespace: monitoring
+      severity: critical
+      short: 1m
+      slo: thanos-store
+  - alert: ErrorBudgetBurn
+    expr: grpc_server_handled:burnrate8m{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring",slo="thanos-store"}
+      > (7 * (1-0.995)) and grpc_server_handled:burnrate1h30m{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring",slo="thanos-store"}
+      > (7 * (1-0.995))
+    for: 4m
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      long: 1h30m
+      namespace: monitoring
+      severity: critical
+      short: 8m
+      slo: thanos-store
+  - alert: ErrorBudgetBurn
+    expr: grpc_server_handled:burnrate30m{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring",slo="thanos-store"}
+      > (2 * (1-0.995)) and grpc_server_handled:burnrate6h{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring",slo="thanos-store"}
+      > (2 * (1-0.995))
+    for: 15m
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      long: 6h
+      namespace: monitoring
+      severity: warning
+      short: 30m
+      slo: thanos-store
+  - alert: ErrorBudgetBurn
+    expr: grpc_server_handled:burnrate1h30m{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring",slo="thanos-store"}
+      > (1 * (1-0.995)) and grpc_server_handled:burnrate1d{grpc_method="Series",grpc_service="thanos.Store",job="thanos-store",namespace="monitoring",slo="thanos-store"}
+      > (1 * (1-0.995))
+    for: 45m
+    labels:
+      grpc_method: Series
+      grpc_service: thanos.Store
+      job: thanos-store
+      long: 1d
+      namespace: monitoring
+      severity: warning
+      short: 1h30m
+      slo: thanos-store

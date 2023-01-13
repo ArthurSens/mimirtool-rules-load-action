@@ -23,10 +23,10 @@ jobs:
       - name: Upload
         uses: ArthurSens/mimirtool-rules-load-action@v1
         with:
-          address: "{{ secrets.address }}"
-          id: "{{ secrets.id }}"
-          key: "{{ secrets.key }}"
-          user: "{{ secrets.user }}"
+          address: ${{ secrets.ADDRESS }}
+          id: ${{ secrets.ID }}
+          key: ${{ secrets.KEY }}
+          user: ${{ secrets.USER }}
           ruleFilesPath: rules/*.yaml
 ```
 
